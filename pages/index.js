@@ -1,6 +1,7 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
-import styles from "../styles/Home.module.css";
+
+import classes from "../styles/Home.module.css";
 
 const data = [
   "Girl BFF",
@@ -49,70 +50,178 @@ const data = [
   "Favorite subject",
 ];
 
+function getUniqueColor(n) {
+  const rgb = [0, 0, 0];
+
+  for (let i = 0; i < 24; i++) {
+    rgb[i % 3] <<= 1;
+    rgb[i % 3] |= n & 0x01;
+    n >>= 1;
+  }
+
+  return (
+    "#" +
+    rgb.reduce(
+      (a, c) => (c > 0x0f ? c.toString(16) : "0" + c.toString(16)) + a,
+      ""
+    )
+  );
+}
+
+const getPlayersObject = (count) => {
+  return Array(2)
+    .fill(0)
+    .map((_, index) => ({ id: index, color: getUniqueColor(index) }));
+};
+
 export default function Home() {
   const [number, setNumber] = useState("");
   const [usedNumbers, setUsedNumbers] = useState([]);
   const [parsedQuestion, setParsedQuestion] = useState([]);
+  const [players, setPlayers] = useState(getPlayersObject(2));
 
-  useEffect(() => {
-    setParsedQuestion(data.sort(() => 0.5 - Math.random()));
+  const init = () => {
+    const parsed = data
+      .sort(() => 0.5 - Math.random())
+      .map((question, index) => ({ id: index, question }));
+
+    setParsedQuestion(parsed);
+    setNumber("");
     setUsedNumbers([]);
-    setNumber("");
-  }, []);
+    setPlayers(getPlayersObject(2));
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setUsedNumbers((existingNumbers) => [...existingNumbers, number]);
-    setNumber("");
+    const parsedQuestionString = Buffer.from(JSON.stringify(parsed)).toString(
+      "base64"
+    );
+    localStorage.setItem("set", parsedQuestionString);
   };
 
-  const questionToView = parsedQuestion[usedNumbers[usedNumbers.length - 1]];
-  const isQuestionforCurrNumber = !!parsedQuestion[number];
+  useEffect(() => {
+    const parsedQuestionDataString = localStorage.getItem("set");
+
+    if (parsedQuestionDataString) {
+      const usedNumbersDataString = localStorage.getItem("taken");
+      const parsedArray = JSON.parse(
+        Buffer.from(parsedQuestionDataString, "base64").toString()
+      );
+
+      setParsedQuestion(parsedArray);
+
+      if (usedNumbersDataString) {
+        const usedParsistedArray = JSON.parse(
+          Buffer.from(usedNumbersDataString, "base64").toString()
+        );
+
+        setUsedNumbers([...usedParsistedArray]);
+        setNumber(usedParsistedArray.slice(-1)[0]);
+      }
+    } else {
+      init();
+    }
+  }, []);
+
+  useEffect(() => {
+    const dataString = Buffer.from(JSON.stringify(usedNumbers)).toString(
+      "base64"
+    );
+
+    localStorage.setItem("taken", dataString);
+  }, [usedNumbers]);
+
+  useEffect(() => {
+    Promise.all(players.map(async (playerObj) => {
+      let name = await prompt(
+        `Please enter player ${playerObj.id + 1} name `,
+        "Harry Potter"
+      );
+      if (name != null) {
+        setPlayers((prevPlayers) =>
+          prevPlayers.map((player) => ({
+            ...player,
+            ...(player.id === playerObj.id ? { name } : {}),
+          }))
+        );
+      }
+    }));
+  }, [players]);
+
+  const handleNumber = (id) => {
+    setUsedNumbers((existingNumbers) => [...existingNumbers, id]);
+    setNumber(id);
+  };
+
+  const handleReset = async () => {
+    const isOk = await confirm("Are you sure? All progress will be lost!");
+
+    if (isOk) {
+      init();
+    }
+  };
+
+  const questionToView = parsedQuestion[number]?.question;
 
   return (
-    <div className={styles.container}>
+    <div className={classes.container}>
       <Head>
         <title>Pick a Number</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className={styles.main}>
-        <h1 className={styles.title}>Welcome to the GAME!</h1>
-        <h1 className={styles.title}>Pick a number</h1>
-        {usedNumbers.includes(number) && (
-          <p style={{ color: "tomato" }}>Already used number</p>
+      <main className={classes.main}>
+        <h1 className={classes.title}>Welcome to the GAME!</h1>
+        <h2 className={classes.help}>Pick a number</h2>
+
+        {questionToView ? (
+          <>
+            <h2>{questionToView ? `Quesion: ${questionToView}?` : ""}</h2>
+            <button onClick={() => setNumber("")}>Done</button>
+          </>
+        ) : (
+          <>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(10, 1fr)",
+                gridTemplateRows: "auto auto",
+              }}
+            >
+              {parsedQuestion.map(({ id }) => (
+                <button
+                  disabled={usedNumbers.includes(id)}
+                  role={"button"}
+                  key={id}
+                  onClick={() => handleNumber(id)}
+                  style={{
+                    margin: 4,
+                    gridColumn: "auto",
+                    minWidth: 30,
+                    height: 30,
+                    border: "2px solid #5aa",
+                    borderRadius: 4,
+                  }}
+                >
+                  {id}
+                </button>
+              ))}
+            </div>
+
+            {usedNumbers.length ? (
+              <button onClick={handleReset}>Reset Game</button>
+            ) : null}
+          </>
         )}
-        {!!number && !isQuestionforCurrNumber && (
-          <p style={{ color: "tomato" }}>
-            No question available for this number
-          </p>
-        )}
-        <form className={styles.form} onSubmit={handleSubmit}>
-          <input
-            type="number"
-            value={number}
-            onChange={(e) => setNumber(e.target.value)}
-          />
-          <button
-            type="submit"
-            disabled={usedNumbers.includes(number) && isQuestionforCurrNumber}
-          >
-            Confirm
-          </button>
-        </form>
-        <h2>{questionToView ? `Quesion: ${questionToView}?` : ""}</h2>
       </main>
 
-      <footer className={styles.footer}>
+      <footer className={classes.footer}>
         <a
           href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
           target="_blank"
           rel="noopener noreferrer"
         >
           Powered by{" "}
-          <img src="/vercel.svg" alt="Vercel Logo" className={styles.logo} />
+          <img src="/vercel.svg" alt="Vercel Logo" className={classes.logo} />
         </a>
-        By{" "}
+        &nbsp; |&nbsp;
         <a
           href="https://sumankundu.com"
           target="_blank"
