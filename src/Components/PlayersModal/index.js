@@ -76,6 +76,7 @@ function PlayerModal({
               title={!(players.length > 2) ? "Atleast 2 players are required!" : ""}
               onClick={(e) => removePlayer(e, playerObj.id)}
               className={classes.removeBtn}
+              aria-label="remove player"
             >
               ❌
             </button>
