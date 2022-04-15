@@ -1,5 +1,7 @@
 import Head from "next/head";
 import { useEffect, useState } from "react";
+import AvatarGenerator from "../lib/AvatarGenerator";
+import PlayerModal from "../src/Components/PlayersModal";
 
 import classes from "../styles/Home.module.css";
 
@@ -50,6 +52,8 @@ const data = [
   "Favorite subject",
 ];
 
+const avatar = new AvatarGenerator();
+
 function getUniqueColor(n) {
   const rgb = [0, 0, 0];
 
@@ -68,17 +72,26 @@ function getUniqueColor(n) {
   );
 }
 
-const getPlayersObject = (count) => {
-  return Array(2)
+const getPlayersObject = (addCount, prevCount = 0) => {
+  return Array(addCount)
     .fill(0)
-    .map((_, index) => ({ id: index, color: getUniqueColor(index) }));
+    .map((_, index) => {
+      return {
+        id: index + prevCount,
+        color: getUniqueColor(index + prevCount),
+        name: "",
+        avatarSeedTry: 1,
+        avatar: avatar.generateRandomAvatar(`Player ${index + prevCount}`),
+      };
+    });
 };
 
 export default function Home() {
   const [number, setNumber] = useState("");
   const [usedNumbers, setUsedNumbers] = useState([]);
   const [parsedQuestion, setParsedQuestion] = useState([]);
-  const [players, setPlayers] = useState(getPlayersObject(2));
+  const [players, setPlayers] = useState([]);
+  const [playersModalOpen, setPlayersModalOpen] = useState(false);
 
   const init = () => {
     const parsed = data
@@ -101,11 +114,16 @@ export default function Home() {
 
     if (parsedQuestionDataString) {
       const usedNumbersDataString = localStorage.getItem("taken");
+      const playersDataString = localStorage.getItem("plrs");
       const parsedArray = JSON.parse(
         Buffer.from(parsedQuestionDataString, "base64").toString()
       );
+      const playersArray = JSON.parse(
+        Buffer.from(playersDataString, "base64").toString()
+      );
 
       setParsedQuestion(parsedArray);
+      setPlayers(playersArray);
 
       if (usedNumbersDataString) {
         const usedParsistedArray = JSON.parse(
@@ -129,20 +147,10 @@ export default function Home() {
   }, [usedNumbers]);
 
   useEffect(() => {
-    Promise.all(players.map(async (playerObj) => {
-      let name = await prompt(
-        `Please enter player ${playerObj.id + 1} name `,
-        "Harry Potter"
-      );
-      if (name != null) {
-        setPlayers((prevPlayers) =>
-          prevPlayers.map((player) => ({
-            ...player,
-            ...(player.id === playerObj.id ? { name } : {}),
-          }))
-        );
-      }
-    }));
+    setPlayersModalOpen(true);
+
+    const dataString = Buffer.from(JSON.stringify(players)).toString("base64");
+    localStorage.setItem("plrs", dataString);
   }, [players]);
 
   const handleNumber = (id) => {
@@ -156,6 +164,13 @@ export default function Home() {
     if (isOk) {
       init();
     }
+  };
+
+  const addPlayer = () => {
+    setPlayers((prevPlayers) => [
+      ...prevPlayers,
+      getPlayersObject(1, prevPlayers.length)[0],
+    ]);
   };
 
   const questionToView = parsedQuestion[number]?.question;
@@ -211,6 +226,14 @@ export default function Home() {
           </>
         )}
       </main>
+      <PlayerModal
+        open={playersModalOpen}
+        onClose={() => setPlayersModalOpen(false)}
+        players={players}
+        setPlayers={setPlayers}
+        generateAvatar={avatar.generateRandomAvatar}
+        addPlayer={addPlayer}
+      />
 
       <footer className={classes.footer}>
         <a

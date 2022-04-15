@@ -1,0 +1,48 @@
+.root {
+  .fieldset {
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0;
+    margin: 0;
+    margin-bottom: 8px;
+
+    :not(:last-child) {
+      margin-right: 16px;
+    }
+
+    input {
+      flex-grow: 1;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #0004;
+    }
+
+    .removeBtn {
+      padding: 0;
+      width: 32px;
+      vertical-align: baseline;
+    }
+  }
+
+  button {
+    height: 32px;
+    padding: 0 12px;
+    cursor: pointer;
+
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  .actions {
+    text-align: right;
+    margin-top: 8px;
+
+    :not(:last-child) {
+      margin-right: 16px;
+    }
+
+  }
+}

@@ -1,0 +1,19 @@
+.root {
+  .overlay {
+    position: fixed;
+    inset: 0px;
+    background-color: #0003;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .surface {
+    width: 600px;
+    max-width: 100%;
+    border-radius: 6px;
+    background-color: #ffffff;
+    padding: 24px;
+    box-shadow: 1px 1px 10px 1px #0001;
+  }
+}
