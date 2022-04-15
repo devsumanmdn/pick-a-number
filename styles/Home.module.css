@@ -40,10 +40,24 @@
   text-decoration: none;
 }
 
-.playerModalToggle {
+.topBarActions {
   position: absolute;
-  inset: 10px 10px auto auto;
+  inset: 16px 16px auto auto;
+}
+
+.topBarActions :not(:last-child) {
+  margin-right: 16px;
+}
+
+.topBarActions button {
+  text-align: center;
   height: 32px;
+  font-size: 16px;
+  padding: 0 12px 0 12px;
+}
+
+.topBarActions .playerModalToggle {
+  padding: 0 0 0 0;
   width: 32px;
   font-size: 18px;
 }
@@ -60,11 +74,26 @@
   font-size: 3rem;
 }
 
+.questionBtn {
+  margin: 4px;
+  grid-column: auto;
+  min-width: 30px;
+  height: 30px;
+  border: 2px solid #5aa;
+  border-radius: 4px;
+}
+
+.questionBtn:disabled {
+  background-color: #ddd;
+  border: 1px solid #aaa;
+}
+
 .help {
   font-size: 2rem;
 }
 
-.title, .help {
+.title,
+.help {
   text-align: center;
 }
 

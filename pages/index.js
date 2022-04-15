@@ -174,8 +174,8 @@ export default function Home() {
   };
 
   const questionToView = parsedQuestion[number]?.question;
-  const forPlayer = players[(usedNumbers.length % players.length)];
-  console.log(forPlayer)
+  const forPlayer = players[usedNumbers.length % players.length];
+  console.log(forPlayer);
 
   return (
     <div className={classes.container}>
@@ -185,19 +185,30 @@ export default function Home() {
       </Head>
 
       <main className={classes.main}>
-        <button
-          className={classes.playerModalToggle}
-          onClick={() => setPlayersModalOpen(true)}
-          aria-label="Open players settings"
-        >
-          ⚙️
-        </button>
+        <div className={classes.topBarActions}>
+          <button
+            className={classes.resetBtn}
+            aria-label="Open players settings"
+            onClick={handleReset}
+          >
+            Reset Game
+          </button>
+          <button
+            className={classes.playerModalToggle}
+            onClick={() => setPlayersModalOpen(true)}
+            aria-label="Open players settings"
+          >
+            ⚙️
+          </button>
+        </div>
         <h1 className={classes.title}>Welcome to the GAME!</h1>
         <h2 className={classes.help}>Pick a number</h2>
 
         {questionToView ? (
           <>
-            <p>Question for {forPlayer.name || `Player ${forPlayer.id + 1}`}:</p>
+            <p>
+              Question for {forPlayer.name || `Player ${forPlayer.id + 1}`}:
+            </p>
             <p>{questionToView ? `${questionToView}?` : ""}</p>
             <button onClick={() => setNumber("")}>Done</button>
           </>
@@ -213,26 +224,19 @@ export default function Home() {
               {parsedQuestion.map(({ id }) => (
                 <button
                   disabled={usedNumbers.includes(id)}
+                  aria-label={`Question ${id + 1}`}
+                  title={
+                    usedNumbers.includes(id) ? "Question is already taken" : ""
+                  }
                   role={"button"}
                   key={id}
                   onClick={() => handleNumber(id)}
-                  style={{
-                    margin: 4,
-                    gridColumn: "auto",
-                    minWidth: 30,
-                    height: 30,
-                    border: "2px solid #5aa",
-                    borderRadius: 4,
-                  }}
+                  className={classes.questionBtn}
                 >
-                  {id}
+                  {id + 1}
                 </button>
               ))}
             </div>
-
-            {usedNumbers.length ? (
-              <button onClick={handleReset}>Reset Game</button>
-            ) : null}
           </>
         )}
       </main>
