@@ -174,6 +174,8 @@ export default function Home() {
   };
 
   const questionToView = parsedQuestion[number]?.question;
+  const forPlayer = players[(usedNumbers.length % players.length)];
+  console.log(forPlayer)
 
   return (
     <div className={classes.container}>
@@ -195,7 +197,8 @@ export default function Home() {
 
         {questionToView ? (
           <>
-            <h2>{questionToView ? `Quesion: ${questionToView}?` : ""}</h2>
+            <p>Question for {forPlayer.name || `Player ${forPlayer.id + 1}`}:</p>
+            <p>{questionToView ? `${questionToView}?` : ""}</p>
             <button onClick={() => setNumber("")}>Done</button>
           </>
         ) : (
