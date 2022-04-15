@@ -183,6 +183,13 @@ export default function Home() {
       </Head>
 
       <main className={classes.main}>
+        <button
+          className={classes.playerModalToggle}
+          onClick={() => setPlayersModalOpen(true)}
+          aria-label="Open players settings"
+        >
+          ⚙️
+        </button>
         <h1 className={classes.title}>Welcome to the GAME!</h1>
         <h2 className={classes.help}>Pick a number</h2>
 

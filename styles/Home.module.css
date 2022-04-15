@@ -40,6 +40,14 @@
   text-decoration: none;
 }
 
+.playerModalToggle {
+  position: absolute;
+  inset: 10px 10px auto auto;
+  height: 32px;
+  width: 32px;
+  font-size: 18px;
+}
+
 .title a:hover,
 .title a:focus,
 .title a:active {
