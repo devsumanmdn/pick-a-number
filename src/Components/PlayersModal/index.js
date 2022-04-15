@@ -77,7 +77,7 @@ function PlayerModal({
               onClick={(e) => removePlayer(e, playerObj.id)}
               className={classes.removeBtn}
             >
-              ➖
+              ❌
             </button>
           </fieldset>
         ))}
